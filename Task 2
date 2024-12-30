@@ -1,0 +1,89 @@
+class LibraryItem:
+    def __init__(self, title, author, category, item_type):
+        self.title = title
+        self.author = author
+        self.category = category
+        self.item_type = item_type
+        self.is_checked_out = False
+        self.due_date = None
+
+    def __str__(self):
+        return f"{self.item_type}: {self.title} by {self.author} ({self.category})"
+
+class Library:
+    def __init__(self):
+        self.items = []
+        self.fines_per_day = 1  # Fine rate per day for overdue items
+
+    def add_item(self, title, author, category, item_type):
+        item = LibraryItem(title, author, category, item_type)
+        self.items.append(item)
+        print(f"Added: {item}")
+
+    def search_items(self, query):
+        results = [item for item in self.items if query.lower() in item.title.lower() or query.lower() in item.author.lower() or query.lower() in item.category.lower()]
+        if results:
+            print("Search Results:")
+            for item in results:
+                print(item)
+        else:
+            print("No items found.")
+
+    def check_out_item(self, title, due_date):
+        for item in self.items:
+            if item.title.lower() == title.lower() and not item.is_checked_out:
+                item.is_checked_out = True
+                item.due_date = due_date
+                print(f"Checked out: {item}")
+                return
+        print("Item not available for checkout.")
+
+    def return_item(self, title, return_date):
+        for item in self.items:
+            if item.title.lower() == title.lower() and item.is_checked_out:
+                item.is_checked_out = False
+                overdue_days = (return_date - item.due_date).days
+                fine = self.fines_per_day * max(0, overdue_days)
+                item.due_date = None
+                print(f"Returned: {item}")
+                if fine > 0:
+                    print(f"Overdue fine: ${fine}")
+                return
+        print("Item not found or not checked out.")
+
+    def list_items(self):
+        if self.items:
+            print("Library Items:")
+            for item in self.items:
+                status = "Checked Out" if item.is_checked_out else "Available"
+                print(f"{item} - {status}")
+        else:
+            print("No items in the library.")
+
+# Example usage
+from datetime import date
+
+library = Library()
+
+# Adding items
+library.add_item("The Great Gatsby", "F. Scott Fitzgerald", "Fiction", "Book")
+library.add_item("National Geographic", "Various", "Science", "Magazine")
+library.add_item("Inception", "Christopher Nolan", "Movie", "DVD")
+
+# Listing items
+library.list_items()
+
+# Searching items
+library.search_items("great")
+
+# Checking out an item
+library.check_out_item("The Great Gatsby", date(2024, 1, 10))
+
+# Listing items again to show status
+library.list_items()
+
+# Returning an item
+library.return_item("The Great Gatsby", date(2024, 1, 15))
+
+# Listing items to show status
+library.list_items()
